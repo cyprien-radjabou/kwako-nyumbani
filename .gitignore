@@ -35,9 +35,18 @@ yarn-error.log*
 
 # typescript
 next-env.d.ts
+tsconfig.tsbuildinfo
 /dist/
+/.vinext/
+/build/
 /.wrangler/
 /.sites-runtime/
+/data/
+database.sqlite
+database.sqlite-wal
+database.sqlite-shm
+*.sqlite-wal
+*.sqlite-shm
 /outputs/
 /work/
 

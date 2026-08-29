@@ -1,34 +1,43 @@
-# vinext-starter
+# Kwako Nyumbani
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+Application Vinext/Vite utilisant Drizzle ORM et SQLite local avec
+`better-sqlite3`.
 
 ## Prerequisites
 
 - Node.js `>=22.13.0`
-- Linux with `flock`, `curl`, and GNU `timeout`
+- Linux pour la production
+- Un chemin absolu et persistant pour `DATABASE_PATH` en production
 
-## Sites Lifecycle
+## Base SQLite
 
-The Sites lifecycle CLI runs the locked dependency install before returning this checkout. Edit the source under `app/`, then checkpoint when a coherent milestone is ready to inspect or share. The remote Sites builder runs `npm run build` against the pushed commit. Do not repeat install or build as a normal pre-checkpoint step.
+En développement, la base par défaut est `data/database.sqlite`. En production,
+`DATABASE_PATH` est obligatoire, doit être absolu et doit viser un volume
+persistant. Le processus refuse de démarrer sans cette variable afin de ne pas
+créer silencieusement une base vide dans un autre dossier.
 
-This starter does not use `wrangler.jsonc`.
+Initialisation locale :
 
-`install:ci` is intentionally a single, non-retrying `npm ci`. It refuses a concurrent install for the same project, consumes a matching image-seeded npm cache with `--prefer-offline` while retaining registry fallback for a missing cache object, otherwise downloads and verifies the complete vinext tarball recorded in `package-lock.json`, limits npm to one socket, and terminates a stalled install. `build` applies a short timeout and then validates the Sites artifact. These helpers target Linux and use GNU `timeout`; they are not native macOS scripts.
+```bash
+npm ci
+npm run db:migrate
+npm run dev
+```
 
-Scripts that need writable project-scoped home, npm, XDG, and temporary paths use `scripts/sites-env.sh`. The `dev` and `start` scripts honor the caller's runtime environment and keep Wrangler logs inside the checkout. The generated `.sites-runtime/` directory is disposable and ignored by Git.
+Installation VPS (exemple) :
 
-## Included Shape
+```bash
+sudo install -d -o www-data -g www-data -m 750 /var/lib/kwako-nyumbani
+npm ci
+DATABASE_PATH=/var/lib/kwako-nyumbani/database.sqlite npm run db:migrate
+npm run build
+pm2 start ecosystem.config.cjs --env production
+pm2 save
+```
 
-- edit site code under `app/`
-- `app/chatgpt-auth.ts` provides optional dispatch-owned ChatGPT sign-in helpers
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/index.ts` reads the D1 binding from the Cloudflare Worker environment
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
+Les migrations sont suivies dans `drizzle/`. Après une modification volontaire
+du schéma, lancer `npm run db:generate`, relire le SQL généré, puis
+`npm run db:migrate`.
 
 ## Workspace Auth Headers
 
@@ -88,21 +97,16 @@ or enforce explicit server-side membership or allowlist checks.
 Use SIWC for account pages, user-specific dashboards, saved records, and write
 actions tied to the current ChatGPT user. Leave public content anonymous.
 
-## Diagnostic Commands
+## Commandes
 
-- `npm run install:ci`: perform the one bounded lockfile install
-- `npm run dev`: start the Vite/Vinext development server
-- `npm run build`: build and validate the deployable Sites artifact
-- `npm run start`: start the built Vinext application
-- `npm test`: build, validate, and verify the rendered development-preview metadata
-- `npm run validate:artifact`: recheck an existing artifact's manifest and ESM `default.fetch` export
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-Use build and validation commands for targeted diagnosis after a remote failure, not as part of the normal checkpoint path.
-
-The timeout defaults can be overridden for a controlled canary with `SITES_INSTALL_TIMEOUT`, `SITES_INSTALL_KILL_AFTER`, `SITES_BUILD_TIMEOUT`, and `SITES_BUILD_KILL_AFTER`. A timeout fails the command; the helpers never retry an unchanged install or build.
+- `npm run dev` : serveur de développement
+- `npm run db:migrate` : crée/met à niveau la base de façon reproductible
+- `npm run db:generate` : génère une migration après changement du schéma
+- `npm run build` : build de production
+- `npm run start` : serveur Node.js de production
+- `npm run typecheck` : vérification TypeScript
 
 ## Learn More
 
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+- [Vinext](https://github.com/cloudflare/vinext)
+- [Drizzle SQLite](https://orm.drizzle.team/docs/get-started/better-sqlite3-new)

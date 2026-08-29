@@ -278,15 +278,19 @@ export default function Home() {
   } | null>(null);
   const [busy, setBusy] = useState(false);
   const [presentationMode, setPresentationMode] = useState(false);
-  const [track, setTrack] = useState<null | {
-    error?: string;
-    status?: string;
-    statusLabel?: string;
-    modelName?: string;
-    reference?: string;
-    updatedAt?: string;
-    progress?: number;
-  }>(null);
+  const [track, setTrack] = useState<
+    | null
+    | { error: string }
+    | {
+        error?: never;
+        status: string;
+        statusLabel: string;
+        modelName: string;
+        reference: string;
+        updatedAt: string;
+        progress: number;
+      }
+  >(null);
   const moveViewer = (direction: number) =>
     setViewer((current) =>
       current
@@ -1104,7 +1108,7 @@ export default function Home() {
                   {busy ? "Recherche…" : "Consulter le statut"}
                 </button>
                 {track &&
-                  (track.error ? (
+                  ("error" in track ? (
                     <div className="notice error">{track.error}</div>
                   ) : (
                     <div className="statusCard">
