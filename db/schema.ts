@@ -1,0 +1,4 @@
+import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+export const reservations=sqliteTable("reservations",{
+ id:integer("id").primaryKey({autoIncrement:true}),reference:text("reference").notNull().unique(),name:text("name").notNull(),employeeId:text("employee_id").notNull(),phone:text("phone").notNull(),email:text("email"),department:text("department"),plot:text("plot"),modelId:text("model_id").notNull(),modelName:text("model_name").notNull(),price:integer("price").notNull(),years:integer("years").notNull(),options:text("options").notNull().default("[]"),optionsTotal:integer("options_total").notNull().default(0),monthly:real("monthly").notNull(),status:text("status").notNull().default("received"),notes:text("notes").notNull().default(""),createdAt:integer("created_at",{mode:"timestamp_ms"}).notNull(),updatedAt:integer("updated_at",{mode:"timestamp_ms"}).notNull()
+});
