@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./admin.css";
+import "./admin-options.css";
 import "./enhancements.css";
 import "./video.css";
 import "./footer-bar.css";

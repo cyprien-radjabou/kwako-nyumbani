@@ -77,18 +77,7 @@ const models = [
   },
 ] as const;
 
-const options = [
-  ["Cuisine équipée", 1500],
-  ["Placards intégrés", 900],
-  ["Climatisation", 700],
-  ["Chauffe-eau", 350],
-  ["Installation solaire", 2500],
-  ["Réservoir d’eau", 300],
-  ["Groupe électrogène", 900],
-  ["Clôture et portail", 3000],
-  ["Aménagement extérieur", 1500],
-  ["Mobilier & électroménager", 2000],
-] as const;
+type CreditOption = { key: string; name: string; price: number };
 const money = (n: number) =>
   new Intl.NumberFormat("fr-FR", {
     style: "currency",
@@ -257,6 +246,8 @@ function loan(principal: number, rate: number, years: number) {
 }
 
 export default function Home() {
+  const [options, setOptions] = useState<CreditOption[]>([]);
+  const [optionsError, setOptionsError] = useState(false);
   const [modelId, setModelId] = useState("economy");
   const [catalogFilter, setCatalogFilter] = useState("all");
   const [years, setYears] = useState(15);
@@ -291,6 +282,15 @@ export default function Home() {
         progress: number;
       }
   >(null);
+  useEffect(() => {
+    fetch("/api/options")
+      .then(async (response) => {
+        if (!response.ok) throw new Error("options unavailable");
+        return response.json() as Promise<{ options: CreditOption[] }>;
+      })
+      .then((data) => setOptions(data.options))
+      .catch(() => setOptionsError(true));
+  }, []);
   const moveViewer = (direction: number) =>
     setViewer((current) =>
       current
@@ -340,8 +340,8 @@ export default function Home() {
     (m) => catalogFilter === "all" || m.id === catalogFilter,
   );
   const optionsTotal = options
-    .filter((o) => selected.includes(o[0]))
-    .reduce((s, o) => s + o[1], 0);
+    .filter((option) => selected.includes(option.key))
+    .reduce((sum, option) => sum + option.price, 0);
   const usesRuashiFinancing = model.id === "ruashi01" || model.id === "ruashi02";
   const simulation = useMemo(() => {
     const total = model.price + optionsTotal,
@@ -395,7 +395,7 @@ export default function Home() {
         modelName: model.name,
         price: model.price,
         years,
-        options: selected,
+        options: options.filter((option) => selected.includes(option.key)).map((option) => option.name),
         optionsTotal,
         monthly: simulation.monthly,
       }),
@@ -617,22 +617,26 @@ export default function Home() {
           </p>
         </div>
         <div className="optionCards">
-          {options.map((o) => (
+          {optionsError ? (
+            <p className="notice error">Les options sont momentanément indisponibles.</p>
+          ) : options.length === 0 ? (
+            <p>Chargement des options…</p>
+          ) : options.map((option) => (
             <button
-              className={selected.includes(o[0]) ? "selected" : ""}
+              className={selected.includes(option.key) ? "selected" : ""}
               onClick={() =>
                 setSelected((s) =>
-                  s.includes(o[0]) ? s.filter((x) => x !== o[0]) : [...s, o[0]],
+                  s.includes(option.key) ? s.filter((key) => key !== option.key) : [...s, option.key],
                 )
               }
-              key={o[0]}
+              key={option.key}
             >
-              <i>{selected.includes(o[0]) ? "✓" : "+"}</i>
+              <i>{selected.includes(option.key) ? "✓" : "+"}</i>
               <span>
-                <b>{o[0]}</b>
+                <b>{option.name}</b>
                 <small>Ajouter au crédit EPANAYO à {epanayoAnnualRateLabel}</small>
               </span>
-              <strong>{money(o[1])}</strong>
+              <strong>{money(option.price)}</strong>
             </button>
           ))}
         </div>

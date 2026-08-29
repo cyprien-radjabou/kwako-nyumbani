@@ -106,6 +106,23 @@ actions tied to the current ChatGPT user. Leave public content anonymous.
 - `npm run start` : serveur Node.js de production
 - `npm run typecheck` : vérification TypeScript
 
+## Développement local des prix d’options
+
+Cette fonctionnalité est isolée sur la branche `feature/admin-options`. Copier
+`.env.example` vers `.env.local`, choisir un chemin SQLite réservé au
+développement et remplacer les trois valeurs d’authentification. Ne jamais
+utiliser le chemin de la base VPS pour ces tests.
+
+```bash
+npm ci
+npm run db:migrate
+npm run dev
+```
+
+Le back-office est disponible sur `/admin/options`. Les identifiants restent
+uniquement dans `.env.local`; la session est stockée dans un cookie signé,
+`HttpOnly`, `SameSite=Strict`, valable huit heures.
+
 ## Learn More
 
 - [Vinext](https://github.com/cloudflare/vinext)
