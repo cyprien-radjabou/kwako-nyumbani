@@ -717,8 +717,8 @@ export default function Home() {
         </div>
       </footer>
       <div className="poweredBar">
-        <a href="https://kwako-nyumbani.heritiersangol.chatgpt.site">
-          kwako-nyumbani.heritiersangol.chatgpt.site
+        <a href="https://www.kwakonyumbani.com">
+          www.kwakonyumbani.com
         </a>
         <span>
           POWERED BY <b>HS CONSULT</b>
