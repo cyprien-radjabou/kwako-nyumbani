@@ -59,7 +59,7 @@ const models = [
     beds: 3,
     baths: 1,
     price: 22534,
-    image: "/assets/ruashi/main-plan-facade.webp",
+    image: "/assets/ruashi/house-facade.webp",
     plan: "/assets/ruashi01/plan.webp",
     tag: "Offre RUASHI",
   },
@@ -71,23 +71,23 @@ const models = [
     beds: 3,
     baths: 2,
     price: 26071,
-    image: "/assets/ruashi/main-plan-facade.webp",
+    image: "/assets/ruashi/house-facade.webp",
     plan: "/assets/ruashi02/plan.webp",
     tag: "Offre RUASHI",
   },
 ] as const;
 
 const options = [
-  ["Cuisine équipée", 1500],
-  ["Placards intégrés", 900],
-  ["Climatisation", 700],
-  ["Chauffe-eau", 350],
-  ["Installation solaire", 2500],
-  ["Réservoir d’eau", 300],
-  ["Groupe électrogène", 900],
-  ["Clôture et portail", 3000],
-  ["Aménagement extérieur", 1500],
-  ["Mobilier & électroménager", 2000],
+  ["Cuisine équipée", 0],
+  ["Placards intégrés", 0],
+  ["Climatisation", 0],
+  ["Chauffe-eau", 0],
+  ["Installation solaire", 0],
+  ["Réservoir d’eau", 0],
+  ["Groupe électrogène", 0],
+  ["Clôture et portail", 0],
+  ["Aménagement extérieur", 0],
+  ["Mobilier & électroménager", 0],
 ] as const;
 const money = (n: number) =>
   new Intl.NumberFormat("fr-FR", {
@@ -153,46 +153,8 @@ const moladiCaptions: Record<(typeof moladiGallery)[number], string> = {
 };
 const moladiCaptionFor = (src: string) =>
   moladiCaptions[src as keyof typeof moladiCaptions];
-const ruashiNeighborhoodGallery = [
-  "/assets/ruashi/neighborhood-1.webp",
-  "/assets/ruashi/neighborhood-2.webp",
-  "/assets/ruashi/neighborhood-3.webp",
-  "/assets/ruashi/landscape-1.webp",
-  "/assets/ruashi/house-facade.webp",
-  "/assets/ruashi/neighborhood-4.webp",
-] as const;
-const ruashiCaptions: Record<(typeof ruashiNeighborhoodGallery)[number], string> = {
-  "/assets/ruashi/neighborhood-1.webp": "Vue du quartier",
-  "/assets/ruashi/neighborhood-2.webp": "Quartier et paysage",
-  "/assets/ruashi/neighborhood-3.webp": "Vue extérieure du quartier",
-  "/assets/ruashi/landscape-1.webp": "Quartier et paysage",
-  "/assets/ruashi/house-facade.webp": "Façade de la maison",
-  "/assets/ruashi/neighborhood-4.webp": "Vue du quartier",
-};
-const ruashiCaptionFor = (src: string) =>
-  ruashiCaptions[src as keyof typeof ruashiCaptions];
-const ruashi02Gallery = [
-  "/assets/ruashi02/gallery-1.webp",
-  "/assets/ruashi02/gallery-2.webp",
-  "/assets/ruashi02/gallery-3.webp",
-  "/assets/ruashi02/gallery-4.webp",
-  "/assets/ruashi02/gallery-5.webp",
-  "/assets/ruashi02/gallery-6.webp",
-  "/assets/ruashi02/gallery-7.webp",
-  "/assets/ruashi02/gallery-8.webp",
-  "/assets/ruashi02/gallery-9.webp",
-  "/assets/ruashi02/gallery-10.webp",
-  "/assets/ruashi02/gallery-11.webp",
-  "/assets/ruashi02/gallery-12.webp",
-  "/assets/ruashi02/plan.webp",
-  ...ruashiNeighborhoodGallery,
-  ...moladiGallery,
-];
-const ruashi01Gallery = [
-  "/assets/ruashi01/plan.webp",
-  ...ruashiNeighborhoodGallery,
-  ...moladiGallery,
-];
+const ruashi02Gallery = [...moladiGallery];
+const ruashi01Gallery = [...moladiGallery];
 const galleries = {
   economy: economyGallery,
   standard: standardGallery,
@@ -235,7 +197,7 @@ const viewerItemsFor = (m: (typeof models)[number]): ViewerItem[] => [
     caption:
       src === m.plan
         ? `Plan — ${m.type} ${m.name}`
-        : moladiCaptionFor(src) ?? ruashiCaptionFor(src) ?? `Galerie ${index + 1} — ${m.type} ${m.name}`,
+        : moladiCaptionFor(src) ?? `Galerie ${index + 1} — ${m.type} ${m.name}`,
   })),
   ...(m.id === "modern"
     ? [
@@ -913,8 +875,6 @@ export default function Home() {
                             ? "Plan de la maison"
                             : moladiCaptionFor(img)
                             ? moladiCaptionFor(img)
-                            : ruashiCaptionFor(img)
-                            ? ruashiCaptionFor(img)
                             : i < 5
                             ? "Vue extérieure"
                             : "Aménagement intérieur"}
