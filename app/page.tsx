@@ -2,6 +2,8 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
+import { calculateFinancing, EPANAYO_ANNUAL_RATE } from "./financing";
+
 const models = [
   {
     id: "economy",
@@ -97,7 +99,7 @@ const money = (n: number) =>
   }).format(n);
 const moneyExact = (n: number) =>
   `${new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)} $US`;
-const epanayoAnnualRate = 0.12;
+const epanayoAnnualRate = EPANAYO_ANNUAL_RATE;
 const epanayoAnnualRateLabel = `${epanayoAnnualRate * 100} %`;
 const economyGallery = [
   "/assets/type1/new-gallery-1.webp",
@@ -209,15 +211,6 @@ const viewerItemsFor = (m: (typeof models)[number]): ViewerItem[] => [
       ]
     : []),
 ];
-function loan(principal: number, rate: number, years: number) {
-  if (principal <= 0) return { monthly: 0, interest: 0, total: 0 };
-  const r = rate / 12,
-    n = years * 12,
-    monthly = (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1),
-    total = monthly * n;
-  return { monthly, interest: total - principal, total };
-}
-
 export default function Home() {
   const [modelId, setModelId] = useState("economy");
   const [catalogFilter, setCatalogFilter] = useState("all");
@@ -304,45 +297,22 @@ export default function Home() {
   const optionsTotal = options
     .filter((o) => selected.includes(o[0]))
     .reduce((s, o) => s + o[1], 0);
-  const usesRuashiFinancing = model.id === "ruashi01" || model.id === "ruashi02";
   const simulation = useMemo(() => {
-    const total = model.price + optionsTotal,
-      deposit = (total * depositPct) / 100,
-      insurance = total * 0.03,
-      epanayoPrincipal = usesRuashiFinancing
-        ? total - deposit - insurance - 500
-        : total - deposit,
-      bankPrincipal = financeDeposit ? deposit : 0;
-    const rows = [5, 10, 15].map((duration) => {
-      const main = loan(epanayoPrincipal, epanayoAnnualRate, duration),
-        bank = loan(bankPrincipal, 0.12, duration);
-      return {
-        duration,
-        monthly: usesRuashiFinancing
-          ? Math.round(main.monthly * 100) / 100 + Math.round(bank.monthly * 100) / 100
-          : main.monthly + bank.monthly,
-        epanayoMonthly: main.monthly,
-        bankMonthly: bank.monthly,
-        interest: main.interest + bank.interest,
-        totalCredit: main.total + bank.total,
-      };
-    });
+    const result = calculateFinancing(
+      model.price + optionsTotal,
+      depositPct,
+      financeDeposit,
+    );
+    const { rows } = result;
     const chosen = rows.find((r) => r.duration === years)!;
-    const upfront = insurance + 500 + (financeDeposit ? 0 : deposit);
     return {
-      total,
-      deposit,
-      insurance,
-      epanayoPrincipal,
-      bankPrincipal,
-      upfront,
+      ...result,
       rows,
       monthly: chosen.monthly,
       interest: chosen.interest,
       totalCredit: chosen.totalCredit,
-      financed: epanayoPrincipal + bankPrincipal,
     };
-  }, [model, optionsTotal, years, depositPct, financeDeposit, usesRuashiFinancing]);
+  }, [model, optionsTotal, years, depositPct, financeDeposit]);
 
   async function reserve(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
